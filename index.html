@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Washington CNA Practice Exam</title>
+<meta name="theme-color" content="#0f6b7d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CNA Practice">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== App bar ===== -->
+<header class="appbar">
+  <div class="row">
+    <span class="logo"><span class="dot"></span> WA CNA Practice</span>
+    <span class="spacer"></span>
+    <span class="stat" id="answeredStat" hidden></span>
+    <span class="timer mono" id="timer" hidden><span class="lbl">Time</span> <span id="timeVal">--:--</span></span>
+  </div>
+  <div class="progress"><div class="fill" id="progressFill"></div></div>
+</header>
+
+<div class="wrap">
+
+<!-- ===== HOME ===== -->
+<section class="screen active" id="homeScreen">
+  <div class="card">
+    <div class="eyebrow">Washington NAC &bull; Certified Nursing Assistant</div>
+    <h1 class="title">Practice Exam &amp; Study Program</h1>
+    <p class="subtitle">Every question from the 200-question knowledge test and the 176-question Pink Sheet skills test — <strong>376 total</strong>, with verified answers and explanations. Works completely offline. No account, no internet.</p>
+  </div>
+
+  <div id="resumeBanner" class="banner" hidden>
+    <div class="txt" id="resumeText"></div>
+    <button class="btn btn-primary" id="resumeBtn">Resume</button>
+    <button class="btn btn-ghost" id="discardBtn">Discard</button>
+  </div>
+
+  <div class="card">
+    <h2 class="sect"><span class="ic">1</span>Choose a mode</h2>
+    <div class="modewrap">
+      <div class="modeswitch" role="tablist" aria-label="Study mode">
+        <button id="modePractice" class="on" role="tab" aria-selected="true">Practice Mode<span class="sub">Answer feedback + explanation right away</span></button>
+        <button id="modeExam" role="tab" aria-selected="false">Exam Mode<span class="sub">Answers hidden until you submit</span></button>
+      </div>
+      <p class="small muted" id="modeHint">Practice Mode shows whether each answer is correct immediately and explains why.</p>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <label for="targetInput">Practice target (%):</label>
+      <input type="number" id="targetInput" min="1" max="100" value="80" style="max-width:100px">
+      <span class="small muted">A personal study goal &mdash; <strong>not</strong> the official Washington passing score, and it does not predict the real exam result.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="sect"><span class="ic">2</span>Choose a test</h2>
+    <div class="testgrid">
+      <button class="testcard" data-test="massive">
+        <span class="tname">Knowledge Test <span class="tcount">200</span></span>
+        <span class="tdesc">The full 200-question Washington CNA knowledge practice test.</span>
+      </button>
+      <button class="testcard" data-test="pink">
+        <span class="tname">Pink Sheet Skills <span class="tcount">176</span></span>
+        <span class="tdesc">176 questions on all 22 hands-on clinical skills.</span>
+      </button>
+      <button class="testcard" data-test="combined">
+        <span class="tname">Combined Test <span class="tcount">376</span></span>
+        <span class="tdesc">Every question from both banks in one exam.</span>
+      </button>
+      <button class="testcard" data-test="random">
+        <span class="tname">Randomized Practice <span class="tcount" id="randCount">25</span></span>
+        <span class="tdesc">A shuffled set drawn from all 376 questions.</span>
+      </button>
+    </div>
+
+    <div class="field">
+      <label for="subjectSelect">Test by skill or subject:</label>
+      <select id="subjectSelect" aria-label="Choose a subject or skill"></select>
+      <button class="btn btn-ghost" id="startSubjectBtn">Start</button>
+    </div>
+    <div class="field">
+      <label for="randSize">Randomized set size:</label>
+      <input type="number" id="randSize" min="5" max="376" step="5" value="25" style="max-width:110px">
+      <span class="small muted">questions (5–376)</span>
+    </div>
+    <div class="field">
+      <button class="btn btn-ghost" id="retestMissedBtn">Retest my missed questions <span id="missedBadge" class="tcount" style="margin-left:2px">0</span></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="sect"><span class="ic">3</span>Your history</h2>
+    <p class="small muted" id="historyEmpty">No completed attempts yet. Your scores will be saved on this device.</p>
+    <div id="historyList"></div>
+    <div id="missedSummary"></div>
+    <div class="actions" style="justify-content:flex-start;margin-top:14px">
+      <button class="btn btn-danger" id="clearHistoryBtn">Clear history &amp; missed list</button>
+    </div>
+  </div>
+
+  <p class="selftest" id="selfTestLine"></p>
+  <p class="foot">Original study aid built from your Washington CNA materials. Not affiliated with Credentia or the Washington State Board of Nursing. If anything conflicts with current official materials, follow the official source.</p>
+</section>
+
+<!-- ===== QUIZ ===== -->
+<section class="screen" id="quizScreen">
+  <div class="card">
+    <div class="qhead">
+      <span class="qcount" id="qCount">Question 1 of 1</span>
+      <span class="qsub" id="qSub">Subject</span>
+      <span class="qtype" id="qType">MC</span>
+      <button class="flagbtn" id="flagBtn" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2a1 1 0 0 1 1 1v1h11.5a1 1 0 0 1 .8 1.6L16 10l3.3 4.4a1 1 0 0 1-.8 1.6H7v6H5V3a1 1 0 0 1 1-1z"/></svg>
+        <span id="flagLbl">Mark for review</span>
+      </button>
+    </div>
+    <h2 class="qtext" id="qText"></h2>
+    <div class="options" id="options" role="radiogroup" aria-label="Answer choices"></div>
+    <div class="feedback" id="feedback" hidden></div>
+  </div>
+</section>
+
+<!-- ===== RESULTS ===== -->
+<section class="screen" id="resultScreen">
+  <div class="card">
+    <div style="text-align:center">
+      <div class="verdict" id="verdict"></div>
+    </div>
+    <div class="ringwrap">
+      <div class="ring">
+        <svg width="160" height="160" viewBox="0 0 160 160" aria-hidden="true">
+          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--line)" stroke-width="15"></circle>
+          <circle id="ringFill" cx="80" cy="80" r="68" fill="none" stroke="var(--brand)" stroke-width="15" stroke-linecap="round" stroke-dasharray="427" stroke-dashoffset="427"></circle>
+        </svg>
+        <div class="pct"><span class="big mono" id="scorePct">0%</span><span class="small" id="scoreFrac">0 / 0</span></div>
+      </div>
+      <div class="statlist">
+        <div class="statrow"><span class="k">Total questions</span><span class="v mono" id="stTotal">0</span></div>
+        <div class="statrow"><span class="k">Correct</span><span class="v good mono" id="stCorrect">0</span></div>
+        <div class="statrow"><span class="k">Incorrect</span><span class="v bad mono" id="stWrong">0</span></div>
+        <div class="statrow"><span class="k">Unanswered</span><span class="v warn mono" id="stBlank">0</span></div>
+        <div class="statrow"><span class="k">Overall score</span><span class="v mono" id="stOverall">0%</span></div>
+        <div class="statrow"><span class="k">Correct % of answered</span><span class="v mono" id="stCorrectPct">0%</span></div>
+        <div class="statrow"><span class="k">Incorrect % of answered</span><span class="v mono" id="stWrongPct">0%</span></div>
+        <div class="statrow"><span class="k">Correct : Incorrect ratio</span><span class="v mono" id="stRatio">0 : 0</span></div>
+        <div class="statrow"><span class="k">Time used</span><span class="v mono" id="stTime">0:00</span></div>
+      </div>
+    </div>
+    <p class="resultmsg" id="resultMsg"></p>
+    <div class="actions">
+      <button class="btn btn-primary" id="retakeBtn">Take it again</button>
+      <button class="btn btn-ghost" id="reviewMissedResBtn">Retest missed only</button>
+      <button class="btn btn-ghost" id="printBtn">Print / Save PDF</button>
+      <button class="btn btn-ghost" id="exportBtn">Download results</button>
+      <button class="btn btn-ghost" id="homeFromResultBtn">Home</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="sect"><span class="ic">%</span>Performance by subject &amp; skill</h2>
+    <div class="dtable" id="domainTable"></div>
+  </div>
+
+  <div class="card">
+    <h2 class="sect"><span class="ic">&#10003;</span>Answer review</h2>
+    <div class="filterbar" id="reviewFilter">
+      <button class="chip on" data-f="all">All</button>
+      <button class="chip" data-f="wrong">Incorrect</button>
+      <button class="chip" data-f="blank">Unanswered</button>
+      <button class="chip" data-f="flagged">Flagged</button>
+    </div>
+    <div id="reviewList"></div>
+  </div>
+</section>
+
+</div>
+
+<!-- ===== Palette drawer ===== -->
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Question navigator">
+  <h3>Question navigator</h3>
+  <div class="dsub">Jump to any question. Return here to submit when ready.</div>
+  <div class="legend">
+    <span><i class="lg-ans"></i> Answered</span>
+    <span><i class="lg-flag"></i> Marked</span>
+    <span><i class="lg-cur"></i> Current</span>
+  </div>
+  <div class="pgrid" id="pgrid"></div>
+  <div class="dactions">
+    <button class="btn btn-ghost" id="drawerClose">Close</button>
+    <button class="btn btn-primary" id="drawerSubmit">Submit test</button>
+  </div>
+</div>
+
+<!-- ===== Bottom nav (quiz only) ===== -->
+<nav class="navbar" id="navbar" hidden>
+  <div class="row">
+    <button class="navbtn" id="prevBtn">&larr; Prev</button>
+    <button class="palettebtn" id="paletteBtn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+      <span class="lbl">Navigator</span>
+    </button>
+    <span class="spacer"></span>
+    <button class="navbtn" id="quitBtn">Quit</button>
+    <button class="navbtn" id="nextBtn">Next &rarr;</button>
+    <button class="submitbtn" id="submitBtn" hidden>Submit</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script src="questions.js"></script>
+<script src="app.js"></script>
+<script>
+  /* Offline PWA support — only registers when served over http(s); harmless on file:// */
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+  }
+</script>
+</body>
+</html>
