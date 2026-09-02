@@ -1,0 +1,3 @@
+# This is a private study tool. Please do not index or crawl it.
+User-agent: *
+Disallow: /
